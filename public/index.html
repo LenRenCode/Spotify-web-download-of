@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id" data-tema="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>MusikLokal — Manajer Koleksi Spotify Pribadi</title>
+  <meta name="description" content="Kelola dan lacak koleksi metadata lagu Spotify-mu secara lokal. Tambahkan track atau playlist, tandai yang sudah di-download, dan ekspor daftarnya." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Favicon emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Loading Overlay ────────────────────────────────────────────────── -->
+  <div id="loading-overlay" class="hidden">
+    <div class="spinner"></div>
+    <p id="loading-text">Mengambil metadata dari Spotify...</p>
+  </div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="/" class="logo" aria-label="MusikLokal - Halaman Utama">
+        <div class="logo-icon" aria-hidden="true">🎵</div>
+        <span class="logo-text">MusikLokal</span>
+      </a>
+
+      <div class="header-right">
+        <button
+          id="theme-toggle"
+          class="btn-icon"
+          title="Ganti tema terang/gelap"
+          aria-label="Toggle tema"
+        >
+          <!-- Diisi oleh JS -->
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Konten Utama ────────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Panel Tambah Lagu -->
+    <section class="add-panel" aria-label="Tambah lagu dari Spotify">
+      <h2>Tambah Lagu atau Playlist</h2>
+
+      <div class="input-row">
+        <div class="input-wrap">
+          <!-- Ikon link -->
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <input
+            type="url"
+            id="link-input"
+            placeholder="Tempel link Spotify: track atau playlist..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Link Spotify"
+          />
+        </div>
+
+        <button id="add-btn" class="btn-primary" aria-label="Tambahkan lagu ke koleksi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Tambah
+        </button>
+      </div>
+
+      <!-- Pesan status (sukses/error) -->
+      <div id="add-status" class="status-msg hidden" role="alert" aria-live="polite"></div>
+    </section>
+
+    <!-- Toolbar: Search + Filter + Export -->
+    <div class="toolbar" role="toolbar" aria-label="Pencarian, filter, dan ekspor">
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Cari judul atau artis..."
+          autocomplete="off"
+          aria-label="Cari lagu"
+        />
+      </div>
+
+      <!-- Filter Pills -->
+      <div class="filter-group" role="group" aria-label="Filter koleksi">
+        <button class="filter-btn active" data-filter="all" id="filter-all">Semua</button>
+        <button class="filter-btn" data-filter="downloaded" id="filter-downloaded">Sudah DL</button>
+        <button class="filter-btn" data-filter="pending" id="filter-pending">Belum DL</button>
+      </div>
+
+      <!-- Export -->
+      <div class="export-group" role="group" aria-label="Ekspor koleksi">
+        <button id="export-json" class="btn-export" aria-label="Ekspor koleksi sebagai JSON">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true">
+            <path d="M12 15V3m0 12-4-4m4 4 4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+          </svg>
+          JSON
+        </button>
+        <button id="export-csv" class="btn-export" aria-label="Ekspor koleksi sebagai CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true">
+            <path d="M12 15V3m0 12-4-4m4 4 4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+          </svg>
+          CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <p class="total-label">Total: <span id="total-counter">–</span></p>
+    </div>
+
+    <!-- Grid Koleksi Lagu -->
+    <section id="song-grid" aria-label="Koleksi lagu">
+      <!-- Kartu lagu dirender oleh app.js -->
+      <div class="empty-state">
+        <div class="empty-icon">🎵</div>
+        <p>Memuat koleksi...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Script ────────────────────────────────────────────────────────────── -->
+  <script src="app.js"></script>
+</body>
+</html>

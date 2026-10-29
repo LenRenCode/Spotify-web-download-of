@@ -1,0 +1,16 @@
+# File environment (berisi kredensial, JANGAN di-commit)
+.env
+
+# Dependensi Node.js
+node_modules/
+
+# Folder data (database & cover lokal, bersifat pribadi)
+data/
+
+# Log
+*.log
+npm-debug.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
